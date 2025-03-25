@@ -46,7 +46,7 @@ export default function Booking() {
             returndate: dayjs(returnDate).format("YYYY/MM/DD"),
         };
 
-        // Dispatch reservation to Redux store
+       
         dispatch(addReservation(reservationItem));
 
         try {
