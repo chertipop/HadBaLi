@@ -1,73 +1,104 @@
-"use client"
+"use client";
 
 import DateReserve from "@/components/DateReserve";
-import TextField from '@mui/material/TextField';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "@/redux/store";
 import { ReservationItem } from "../../../interface";
 import dayjs, { Dayjs } from "dayjs";
 import { addReservation } from "@/redux/features/cartSlice";
 import { useSearchParams } from "next/navigation";
-import CarCatalog from "@/components/CarCatalog";
-import Car from "../(carinfo)/car/page";
-import Card from "@/components/Card";
-import { userAgent } from "next/server";
-import getUserProfile from "@/libs/getUserProfile";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../api/auth/[...nextauth]/authOptions";
-import { Select, MenuItem } from "@mui/material";
-import ProviderReserve from "@/components/ProviderReserve";
 
 export default function Booking() {
+    const urlParams = useSearchParams();
+    const cid = urlParams.get("id");
+    const brand = urlParams.get("brand");
+    const userId = urlParams.get("user");
+    const dispatch = useDispatch<AppDispatch>();
 
+    const [pickupDate, setPickupDate] = useState<Dayjs | null>(null);
+    const [returnDate, setReturnDate] = useState<Dayjs | null>(null);
 
-    const urlParams = useSearchParams()
-    const cid =urlParams.get('id')
-    const brand = urlParams.get('brand')
-    const user = urlParams.get('user')
-    const dispatch = useDispatch<AppDispatch>()
+    // Log changes to pickupDate and returnDate
+    useEffect(() => {
+        console.log("pickupDate changed: ", pickupDate);
+        console.log("returnDate changed: ", returnDate);
+    }, [pickupDate, returnDate]);
 
-    const [pickupDate, setPickupDate] = useState<Dayjs|null>(null)
-    const [pickupLocation, setPickupLocation] = useState<string>("Bangkok")
-    const [returnDate, setReturnDate] = useState<Dayjs|null>(null)
-    const [returnLocation, setReturnLocation] = useState<string>("Bangkok")
-    const [pickupProvider,setProvider] = useState<string>("Tahto Naju")
-    const [car, setCar] = useState<string>("Toyota Yaris");
-    
+    // Create booking function that handles API call
+    const createBooking = async () => {
+        // Log values before validation
+        // console.log("Creating booking...");
+        // console.log("cid: ", cid);
+        // console.log("user: ", userId);
+        // console.log("pickupDate: ", pickupDate);
+        // console.log("returnDate: ", returnDate);
 
-    const makeReservation=()=>{
-        if(cid && brand && pickupDate && returnDate){
-            const item:ReservationItem={
-                carId:cid,
-                carModel:brand,
-                pickupdate: dayjs(pickupDate).format("YYYY/MM/DD"),
-                returndate: dayjs(returnDate).format("YYYY/MM/DD"),
-            }
-            dispatch(addReservation(item));
-        } else {
+        if (!cid || !userId || !pickupDate || !returnDate) {
             alert("Please fill in all required fields.");
+            return;
         }
-    }
+
+        const reservationItem: ReservationItem = {
+            user: userId,
+            car: cid,
+            pickupdate: dayjs(pickupDate).format("YYYY/MM/DD"),
+            returndate: dayjs(returnDate).format("YYYY/MM/DD"),
+        };
+
+        // Dispatch reservation to Redux store
+        dispatch(addReservation(reservationItem));
+
+        try {
+            // Make API call to create the reservation
+            const response = await fetch(
+                `${process.env.BACKEND_URL}/api/v1/cars/${cid}/reservations`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        user: userId,
+                        pickupdate: reservationItem.pickupdate,
+                        returndate: reservationItem.returndate,
+                    }),
+                }
+            );
+
+            console.log(response);
+
+
+            if (!response.ok) {
+                throw new Error("Failed to create reservation.");
+            }
+
+            // Handle successful booking
+            const data = await response.json();
+            alert("Your booking has been successfully created!");
+            console.log(data); // Optionally log the response from the backend
+        } catch (error) {
+            alert(`Error`);
+        }
+    };
+
     return (
         <main className="w-[100%] flex flex-col items-center space-y-4 bg-[#F9F3EF] min-h-screen">
             <div className="text-xl font-medium">Car Booking</div>
-            {brand ? <div className="text-xl font-medium">Car {brand}</div> : null}
-    
+            {brand && <div className="text-xl font-medium">Car {brand}</div>}
+
             <DateReserve
                 onPickupDateChange={(value: Dayjs) => setPickupDate(value)}
                 onReturnDateChange={(value: Dayjs) => setReturnDate(value)}
-                onLocationChange={(value: string) => setCar(value)}
             />
-    
+
             <button
                 name="Book Car"
                 className="block rounded-md bg-sky-600 hover:bg-indigo-600 px-3 py-2 text-white shadow-sm"
-                onClick={makeReservation}
+                onClick={createBooking}
             >
                 Book Car
             </button>
         </main>
-    );    
-
+    );
 }

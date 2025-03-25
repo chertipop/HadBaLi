@@ -1,6 +1,9 @@
 import Image from "next/image";
 import getCar from "@/libs/getCar";
 import Link from "next/link";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
+import getUserProfile from "@/libs/getUserProfile";
 
 export default async function CarDetailPage({
   params,
@@ -8,7 +11,12 @@ export default async function CarDetailPage({
   params: { cid: string };
 }) {
   const carDetail = await getCar(params.cid);
+  const session = await getServerSession(authOptions);
 
+  if (!session || !session.user.token) return null;
+
+  const profile = await getUserProfile(session.user.token)
+  console.log(profile)
   return (
     <main className="h-screen bg-[#596176] flex justify-center items-center">
       {/* White background with 90% height, no scrolling */}
@@ -272,7 +280,7 @@ export default async function CarDetailPage({
             </div>
 
             {/* Make Booking button positioned at the bottom-right corner */}
-            <Link href={`/booking?id=${params.cid}&model=${carDetail.data.model}`} >
+            <Link href={`/booking?id=${params.cid}&brand=${carDetail.data.brand}&user=${profile.data._id}`} >
               <button
                 className="absolute bottom-8 right-4 rounded-md bg-[#81313D] hover:bg-indigo-600 px-4 py-2 text-white text-2xl shadow-sm"
                 name="Book Car"

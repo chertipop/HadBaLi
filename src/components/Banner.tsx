@@ -22,10 +22,6 @@ export default function Banner() {
             priority
             objectFit='cover'
             />
-            {
-                session? <div className ='z-30 absolute top- left-10 font-semibold text-cyan-800 text-xl'>Welcome {session.user?.name}</div>
-                : null
-            }
             <button className="absolute bottom-5 right-5 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-lg shadow-md transition z-50" onClick={(e)=>{e.stopPropagation(),router.push('/car')}}>Select Car</button>
         </div>
     )

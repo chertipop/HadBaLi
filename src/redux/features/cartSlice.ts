@@ -23,7 +23,7 @@ export const cartSlice = createSlice({
     removeReservation: (state, action: PayloadAction<ReservationItem>) => {
       const remainItems = state.carItems.filter(obj => {
         return (
-          obj.carModel !== action.payload.carModel ||
+          obj.car !== action.payload.car ||
           obj.pickupdate !== action.payload.pickupdate ||
           obj.returndate !== action.payload.returndate
         );
@@ -34,8 +34,8 @@ export const cartSlice = createSlice({
       const { oldItem, newItem } = action.payload;
 
       const existingItem = state.carItems.find(obj =>
-        obj.carModel === oldItem.carModel &&
-        obj.carId === oldItem.carId
+        obj.car === oldItem.car &&
+        obj.car === oldItem.car
       );
 
       if (existingItem) {

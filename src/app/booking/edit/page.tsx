@@ -14,7 +14,8 @@ import ProviderReserve from "@/components/ProviderReserve";
 export default function Booking() {
     const urlParams = useSearchParams();
     const cid = urlParams.get('cid');
-    const model = urlParams.get('model');
+    const userId = urlParams.get('user');
+    const brand = urlParams.get('model');
     const dispatch = useDispatch<AppDispatch>();
 
     const [pickupDate, setPickupDate] = useState<Dayjs | null>(null);
@@ -27,11 +28,11 @@ export default function Booking() {
     // ✅ Rename function to avoid conflict
     const handleEditReservation = () => {
         console.log("cid:", cid);
-        console.log("model:", model);
+        console.log("user:", userId);
         console.log("pickupDate:", pickupDate);
         console.log("returnDate:", returnDate);
     
-        if (!cid || !model || !dayjs(pickupDate).isValid() || !dayjs(returnDate).isValid()) {
+        if (!cid || !userId || !dayjs(pickupDate).isValid() || !dayjs(returnDate).isValid()) {
             alert("Please select valid dates before editing the reservation.");
             return;
         }
@@ -41,8 +42,8 @@ export default function Booking() {
         const duration = dayjs(returnDate).diff(dayjs(pickupDate), 'day');
     
         const oldItem: ReservationItem = {
-            carId: cid,
-            carModel: model,
+            car: cid,
+            user: userId,
             pickupdate: formattedPickupDate,
             returndate: formattedReturnDate,
         };
@@ -61,13 +62,12 @@ export default function Booking() {
     return (
         <main className="w-[100%] flex flex-col items-center space-y-4">
             <div className="text-xl font-medium">Edit Reservation</div>
-            <div className="text-xl font-medium">Car {model}</div>
+            <div className="text-xl font-medium">Car {brand}</div>
 
             <div className="text-md text-left text-gray-600">Edit the date and car that you reserved.</div>
                         <DateReserve
                             onPickupDateChange={(value: Dayjs) => setPickupDate(value)}
                             onReturnDateChange={(value: Dayjs) => setReturnDate(value)}
-                            onLocationChange={(value: string) => setCar(value)}
                         />
 
             <button

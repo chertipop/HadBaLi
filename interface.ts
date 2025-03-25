@@ -1,8 +1,8 @@
 import { StringExpression } from "mongoose"
 
 export interface ReservationItem {
-  carId: string
-  carModel: string;
+  car: string;
+  user: string;
   pickupdate: string;
   returndate: string;
 }

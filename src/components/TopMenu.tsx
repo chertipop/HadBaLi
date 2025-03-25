@@ -1,11 +1,9 @@
-"use client";
-
 import Image from "next/image";
 import TopMenuItem from "./TopMenuItem";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 import { Link } from "@mui/material";
-import styles from "./topmenu.module.css"; // Import the styles
+import styles from "./topmenu.module.css";
 
 export default async function TopMenu() {
   const session = await getServerSession(authOptions);
@@ -20,30 +18,18 @@ export default async function TopMenu() {
         height={0}
         sizes="100vh"
       />
-
       <TopMenuItem title="Select Car" pageRef="/car" />
       <TopMenuItem title="Home" pageRef="/" />
 
-      <div className={`${styles.rightSection} flex flex-row absolute right-0 h-full`}>
+      <div className={`flex flex-row absolute right-0 h-full`}>
         <TopMenuItem title="Cart" pageRef="/cart" />
         {session ? (
-          <Link href="/api/auth/signout">
-            <div className={styles.itemcontainer}>
-              Sign-Out {/*session.user?.name*/}
-            </div>
-          </Link>
+          <TopMenuItem title="Sign-Out" pageRef="/api/auth/signout" />
         ) : (
           <>
-            <Link href="/register">
-              <div className={styles.itemcontainer}> {/* Apply itemcontainer style */}
-                Register
-              </div>
-            </Link>
-            <Link href="/api/auth/signin">
-              <div className={styles.itemcontainer}> {/* Apply itemcontainer style */}
-                Sign-In
-              </div>
-            </Link>
+          <TopMenuItem title="Register" pageRef="/register" />
+          <TopMenuItem title="Sign-in" pageRef="/api/auth/signin" />
+
           </>
         )}
       </div>

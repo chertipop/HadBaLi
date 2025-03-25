@@ -31,6 +31,21 @@ export default function ReservationCart() {
   useEffect(() => setIsMounted(true), []);
   if (!isMounted) return <p>Loading...</p>;
 
+  const cars = [
+    { id: "67e17d4be504b1d67e36a083", model: "Toyota Yaris" },
+    { id: "67e18705e504b1d67e36a0cb", model: "Toyota Fortuner" },
+    { id: "67e187d4e504b1d67e36a0d8", model: "Toyota Altis" },
+    { id: "67e188dce504b1d67e36a0e5", model: "Honda Civic" },
+    { id: "67e18a2fe504b1d67e36a0fc", model: "Mitsubishi Outlander" },
+    { id: "67e18b8fe504b1d67e36a102", model: "Nissan Navara King Cab" }
+  ];
+  
+  // หา model ของรถจาก `id`
+  const getCarModel = (carId: string) => {
+    const car = cars.find(c => c.id === carId);
+    return car ? car.model : "Unknown Model"; // ถ้าไม่เจอ ให้ขึ้นว่า "Unknown Model"
+  };
+
   return (
     <>
       {carItems.map((reservationItem) => {
@@ -39,9 +54,11 @@ export default function ReservationCart() {
         return (
           <div
             className="bg-slate-200 rounded px-5 mx-5 py-2 my-2"
-            key={reservationItem.carId}
+            key={reservationItem.car}
           >
-            <div className="text-xl font-semibold">{reservationItem.carModel}</div>
+            <div className="text-xl font-semibold">
+              {getCarModel(reservationItem.car)}
+            </div>
             <div className="text-sm">
               <span className="font-medium">Pick-up:</span> {reservationItem.pickupdate}
             </div>
@@ -60,8 +77,8 @@ export default function ReservationCart() {
                   })
                 );
                 const queryParams = new URLSearchParams({
-                  cid: reservationItem.carId,
-                  model: reservationItem.carModel,
+                  cid: reservationItem.car,
+                  brand: getCarModel(reservationItem.car),
                 }).toString();
                 router.push(`/booking/edit?${queryParams}`);
               }}
