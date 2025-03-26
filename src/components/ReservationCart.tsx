@@ -42,7 +42,7 @@ export async function getServerSideProps(context: any) {
   };
 }
 
-export default function ReservationCart({ profile }: { profile: any }) {
+export default function ReservationCart() {
   const router = useRouter();
   const carItems = useAppSelector((state) => state.cartSlice.carItems);
   const dispatch = useDispatch<AppDispatch>();
@@ -98,8 +98,7 @@ export default function ReservationCart({ profile }: { profile: any }) {
                 );
                 const queryParams = new URLSearchParams({
                   cid: reservationItem.car,
-                  brand: getCarModel(reservationItem.car),
-                  user: profile?._id ?? "", // Ensure _id exists, or use a fallback value like an empty string
+                  brand: getCarModel(reservationItem.car)
                 }).toString();
                 router.push(`/booking/edit?${queryParams}`);
               }}
