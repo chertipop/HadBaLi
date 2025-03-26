@@ -1,9 +1,11 @@
-"use client";
 import { useEffect, useState } from "react";
 import { removeReservation, editReservation } from "@/redux/features/cartSlice";
 import { useRouter } from "next/navigation";
 import { AppDispatch, useAppSelector } from "@/redux/store";
 import { useDispatch } from "react-redux";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
+import getUserProfile from "@/libs/getUserProfile";
 
 // Mock provider data (Replace with a real API if needed)
 const providerInfo: Record<string, { address: string; tel: string }> = {
@@ -21,13 +23,33 @@ const providerInfo: Record<string, { address: string; tel: string }> = {
   },
 };
 
-export default function ReservationCart() {
+// Server-side fetching session and user profile
+export async function getServerSideProps(context: any) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || !session.user.token) {
+    return {
+      notFound: true,
+    };
+  }
+
+  const profile = await getUserProfile(session.user.token);
+
+  return {
+    props: {
+      profile: profile.data,
+    },
+  };
+}
+
+export default function ReservationCart({ profile }: { profile: any }) {
   const router = useRouter();
   const carItems = useAppSelector((state) => state.cartSlice.carItems);
   const dispatch = useDispatch<AppDispatch>();
 
-  // Track hydration status to prevent SSR mismatch
   const [isMounted, setIsMounted] = useState(false);
+
+  // Track hydration status to prevent SSR mismatch
   useEffect(() => setIsMounted(true), []);
   if (!isMounted) return <p>Loading...</p>;
 
@@ -37,20 +59,18 @@ export default function ReservationCart() {
     { id: "67e187d4e504b1d67e36a0d8", model: "Toyota Altis" },
     { id: "67e188dce504b1d67e36a0e5", model: "Honda Civic" },
     { id: "67e18a2fe504b1d67e36a0fc", model: "Mitsubishi Outlander" },
-    { id: "67e18b8fe504b1d67e36a102", model: "Nissan Navara King Cab" }
+    { id: "67e18b8fe504b1d67e36a102", model: "Nissan Navara King Cab" },
   ];
-  
-  // หา model ของรถจาก `id`
+
+  // Find car model by ID
   const getCarModel = (carId: string) => {
-    const car = cars.find(c => c.id === carId);
-    return car ? car.model : "Unknown Model"; // ถ้าไม่เจอ ให้ขึ้นว่า "Unknown Model"
+    const car = cars.find((c) => c.id === carId);
+    return car ? car.model : "Unknown Model"; // If not found, return "Unknown Model"
   };
 
   return (
     <>
       {carItems.map((reservationItem) => {
-          
-
         return (
           <div
             className="bg-slate-200 rounded px-5 mx-5 py-2 my-2"
@@ -79,6 +99,7 @@ export default function ReservationCart() {
                 const queryParams = new URLSearchParams({
                   cid: reservationItem.car,
                   brand: getCarModel(reservationItem.car),
+                  user: profile?._id ?? "", // Ensure _id exists, or use a fallback value like an empty string
                 }).toString();
                 router.push(`/booking/edit?${queryParams}`);
               }}
